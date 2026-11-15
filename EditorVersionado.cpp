@@ -79,13 +79,11 @@ int EditorVersionado::version_actual() const {
 }
 
 const set<string> & EditorVersionado::versiones_con_nombre() const {
-	//... completar: ESTE RETURN ESTÁ MAL!!!!
-	return set<string>();
+	return _nombres; //devolvemos el set que creamos en el private 
 }
 
 const string & EditorVersionado::nombre_version_actual() const {
-	//... completar: ESTE RETURN ESTÁ MAL!!!!
-	return "";
+	return _versiones[_version_actual].nombre;
 }
 
 int EditorVersionado::deshacer() {
