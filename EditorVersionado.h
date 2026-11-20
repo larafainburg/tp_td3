@@ -121,7 +121,7 @@ private:
   // (solo para versiones con nombre; evita reconstruir el texto pasando
   // por todas las versiones intermedias)
   map<id_version, vector<string>> _texto_de_version;
-
+};
 
 // Chequeo de _versiones
 // longitud_texto(v: versiones, pos: int) === Sum(i=1...pos) {if v[i].es_insercion then 1 else -1 fi}

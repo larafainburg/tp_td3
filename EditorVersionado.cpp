@@ -32,8 +32,19 @@ const string& EditorVersionado::palabra_en(int pos) const {
 	return _palabras[pos];
 }
 
-void EditorVersionado::olvidar_version(const string & nombre) {
-	//... completar
+void EditorVersionado::olvidar_version(const string &nombre) {
+	map<string, id_version>::iterator it = _version_de_nombre.find(nombre);
+	if (it == _version_de_nombre.end()) return;
+
+	id_version id = it->second;
+
+	_version_de_nombre.erase(it);
+	_nombres.erase(nombre);
+	_texto_de_version.erase(id);
+
+	if (id < cantidad_versiones()) {
+		_versiones[id].nombre = "";
+	}
 }
 
 void EditorVersionado::insertar_palabra(const string& palabra, int pos) {
@@ -74,8 +85,7 @@ int EditorVersionado::cantidad_versiones() const {
 }
 
 int EditorVersionado::version_actual() const {
-	//... completar: ESTE RETURN ESTÁ MAL!!!!
-	return -1;
+	return _version_actual;
 }
 
 const set<string> & EditorVersionado::versiones_con_nombre() const {
@@ -138,8 +148,7 @@ int EditorVersionado::ir_a_version(int ver) { //REVISAR!!!
 }
 
 int EditorVersionado::ir_a_version_con_nombre(const string & nombre) {
-	//... completar: ESTE RETURN ESTÁ MAL!!!!
-	return -1;
+	return ir_a_version(_version_de_nombre[nombre]); 
 }
 
 void EditorVersionado::nombrar_version_actual(const string& nombre) {
@@ -159,11 +168,55 @@ void EditorVersionado::nombrar_version_actual(const string& nombre) {
 
 int EditorVersionado::cargar_archivo(const string &archivo,
                                      const string &archivo_versiones) {
-	//... completar: ESTE RETURN ESTÁ MAL!!!!
-	return -1;
+	*this = EditorVersionado();
+
+	ifstream ver(archivo_versiones);
+	if (!ver) {
+		ifstream txt(archivo);
+		string palabra;
+		while (txt >> palabra) insertar_palabra(palabra, longitud());
+		return _versiones[_version_actual].pos;
+	}
+
+	string linea, nombre;
+
+	getline(ver, linea);
+	stringstream cero(linea);
+	if (cero >> nombre) nombrar_version_actual(nombre);
+
+	while (getline(ver, linea)) {
+		stringstream ss(linea);
+		int pos, es_insercion;
+		string palabra;
+		ss >> pos >> es_insercion >> palabra;
+
+		if (es_insercion == 1) insertar_palabra(palabra, pos);
+		else borrar_palabra(pos);
+
+		if (ss >> nombre) nombrar_version_actual(nombre);
+	}
+
+	return _versiones[_version_actual].pos;
 }
 
-void EditorVersionado::guardar_archivo(const string& archivo, const string& archivo_versiones) const
-{
-	//... completar
+void EditorVersionado::guardar_archivo(const string &archivo,
+                                       const string &archivo_versiones) const {
+	vector<string> texto = _palabras;
+	for (int i = _version_actual + 1; i < cantidad_versiones(); i++) {
+		const version &v = _versiones[i];
+		if (v.es_insercion) texto.insert(texto.begin() + v.pos, v.palabra);
+		else texto.erase(texto.begin() + v.pos);
+	}
+
+	ofstream txt(archivo);
+	for (const string &palabra : texto) txt << palabra << " ";
+
+	ofstream ver(archivo_versiones);
+	ver << _versiones[0].nombre << "\n";
+	for (int i = 1; i < cantidad_versiones(); i++) {
+		const version &v = _versiones[i];
+		ver << v.pos << " " << (v.es_insercion ? 1 : 0) << " " << v.palabra;
+		if (!v.nombre.empty()) ver << " " << v.nombre;
+		ver << "\n";
+	}
 }
