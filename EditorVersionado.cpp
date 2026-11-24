@@ -143,6 +143,7 @@ int EditorVersionado::ir_a_version(int ver) {
 	return pos_resultado;
 }
 
+
 int EditorVersionado::ir_a_version_con_nombre(const string & nombre) {
 	return ir_a_version(_version_de_nombre[nombre]);
 }
